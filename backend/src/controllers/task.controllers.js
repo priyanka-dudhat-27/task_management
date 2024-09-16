@@ -92,9 +92,32 @@ const getTasksByCategory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, tasks, "Tasks retrieved successfully."));
 });
 
-
+//mark task as completed
+const markTaskAsCompleted = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { user } = req; 
+  
+    const task = await Task.findById(taskId);
+  
+    if (!task) {
+      throw new ApiError(404, "Task not found.");
+    }
+  
+    if (task.userId.toString() !== user._id.toString()) {
+      throw new ApiError(403, "You do not have permission to update this task.");
+    }
+  
+    task.status = 'Completed';
+    await task.save();
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, task, "Task marked as completed successfully."));
+  });
+  
 export { 
     createTask,
     deleteTaskByUser,
-    getTasksByCategory
+    getTasksByCategory,
+    markTaskAsCompleted
  };
