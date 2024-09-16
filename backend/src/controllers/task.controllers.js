@@ -223,6 +223,45 @@ const createTaskForUserByAdmin = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, null, "Task deleted successfully by admin."));
   });
 
+  // view a list of all users (admin only)
+  const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find().select("-password -refreshToken");
+    
+    return res
+      .status(200)
+      .json(new ApiResponse(200, users, "List of all users"));
+  });
+
+  //assign role to user by admin
+  const assignUserRole = asyncHandler(async (req, res) => {
+    const { userId, role } = req.body;
+  
+    if (!userId || !role) {
+      throw new ApiError(400, "User ID and role are required.");
+    }
+  
+    const validRoles = ["Admin", "User"];
+    if (!validRoles.includes(role)) {
+      throw new ApiError(400, `Invalid role. Valid roles are: ${validRoles.join(", ")}`);
+    }
+  
+    // Find the user and update user role
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true } 
+    ).select("-password -refreshToken");
+  
+    if (!user) {
+      throw new ApiError(404, "User not found.");
+    }
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, `User role updated to ${role}`));
+  });
+  
+
 export { 
     createTask,
     deleteTaskByUser,
@@ -231,5 +270,7 @@ export {
     markTaskAsCompleted,
     createTaskForUserByAdmin,
     updateTaskForAnyUserByAdmin,
-    deleteTaskForAnyUserByAdmin
+    deleteTaskForAnyUserByAdmin,
+    getAllUsers,
+    assignUserRole
  };
