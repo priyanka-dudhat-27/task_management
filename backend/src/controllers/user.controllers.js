@@ -23,44 +23,49 @@ const generateAccessAndRefreshToken=async(userId)=>{
 }
 
 const registerUser = asyncHandler(async (req, res) => {
+  const { fullname, email, username, password, role } = req.body;
 
-  const { fullname, email, username, password } = req.body;
+  // Validate required fields
   if (
     [fullname, email, username, password].some(
       (field) => !field || field.trim() === ""
-    )
+    ) ||
+    !role || !["Admin", "User"].includes(role) // Validate role field
   ) {
-    throw new ApiError(400, "All fields are required and must not be empty");
+    throw new ApiError(400, "All fields are required and must not be empty, and role must be either 'Admin' or 'User'");
   }
 
-  const existedUser =await User.findOne({
+  // Check if user already exists
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email or username already exist");
+    throw new ApiError(409, "User with email or username already exists");
   }
 
-  
+  // Create new user
   const user = await User.create({
     fullname,
     email,
     password,
     username: username.toLowerCase(),
+    role, // Include role in user creation
   });
 
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  // Fetch the created user without sensitive information
+  const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
   if (!createdUser) {
-    throw new ApiError(500, "Something went wriong while register the user");
+    throw new ApiError(500, "Something went wrong while registering the user");
   }
 
+  // Send response
   return res
     .status(201)
     .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
+
 
 // login
 const loginUser=asyncHandler(async(req,res)=>{
@@ -181,12 +186,14 @@ const refreshAccessToken =asyncHandler(async(req,res)=>{
 
   })
 
+  
 
+  
   
 export { 
   registerUser ,
   loginUser,
   logoutUser,
   refreshAccessToken,
- 
+
 }
