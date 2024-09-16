@@ -176,11 +176,60 @@ const createTaskForUserByAdmin = asyncHandler(async (req, res) => {
   
     return res.status(201).json(new ApiResponse(201, task, "Task created for the user successfully."));
   });
+
+  // Admin updates any user's task
+  const updateTaskForAnyUserByAdmin = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { description, category, status } = req.body;
+  
+    const task = await Task.findById(taskId);
+  
+    if (!task) {
+      throw new ApiError(404, "Task not found.");
+    }
+  
+    // Validate and update task details
+    if (description) task.description = description;
+    if (category) task.category = category;
+  
+    const validStatuses = ['Pending', 'In Progress', 'Completed'];
+    if (status && validStatuses.includes(status)) {
+      task.status = status;
+    } else if (status) {
+      throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
+  
+    const updatedTask = await task.save();
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedTask, "Task updated successfully by admin."));
+  });
+
+  // Admin deletes any user's task
+ const deleteTaskForAnyUserByAdmin = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+  
+    const task = await Task.findById(taskId);
+  
+    if (!task) {
+      throw new ApiError(404, "Task not found.");
+    }
+  
+    await Task.findByIdAndDelete(taskId);
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "Task deleted successfully by admin."));
+  });
+
 export { 
     createTask,
     deleteTaskByUser,
     updateTaskByUser,
     getTasksByCategory,
     markTaskAsCompleted,
-    createTaskForUserByAdmin
+    createTaskForUserByAdmin,
+    updateTaskForAnyUserByAdmin,
+    deleteTaskForAnyUserByAdmin
  };

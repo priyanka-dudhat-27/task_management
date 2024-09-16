@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middlware.js";
-import { createTask , deleteTaskByUser , updateTaskByUser , getTasksByCategory , markTaskAsCompleted , createTaskForUserByAdmin } from "../controllers/task.controllers.js";
+import { createTask , deleteTaskByUser , updateTaskByUser , getTasksByCategory , markTaskAsCompleted , createTaskForUserByAdmin , updateTaskForAnyUserByAdmin , deleteTaskForAnyUserByAdmin } from "../controllers/task.controllers.js";
 const router = Router();
 
 router.route("/createTask").post(verifyJWT(['User']),createTask)
@@ -12,7 +12,8 @@ router.route("/taskAsCompleted/:taskId").patch(verifyJWT(['User']), markTaskAsCo
 
 //admin
 router.route("/createTaskByAdmin").post(verifyJWT(['Admin']),createTaskForUserByAdmin )
-
+router.route("/deleteTaskByAdmin/:taskId").delete(verifyJWT(['Admin']),deleteTaskForAnyUserByAdmin )
+router.route("/updateTaskByAdmin/:taskId").patch(verifyJWT(['Admin']),updateTaskForAnyUserByAdmin )
 
  
 export default router;
