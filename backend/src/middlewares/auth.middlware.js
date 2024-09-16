@@ -36,22 +36,3 @@ export const verifyJWT = (roles = []) => asyncHandler(async (req, res, next) => 
     }
 });
 
-/*
-    import express from 'express';
-import { verifyJWT } from './middlewares/verifyJWT.js'; // Update the path as necessary
-
-const router = express.Router();
-
-// Route accessible by admin users only
-router.get('/admin-dashboard', verifyJWT(['admin']), (req, res) => {
-    res.send('Welcome to the admin dashboard!');
-});
-
-// Route accessible by both admin and regular users
-router.get('/user-profile', verifyJWT(['admin', 'user']), (req, res) => {
-    res.send('Welcome to your profile!');
-});
-
-export default router;
-
-*/
