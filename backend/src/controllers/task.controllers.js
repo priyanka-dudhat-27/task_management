@@ -38,8 +38,6 @@ const createTask = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, task, "Task created successfully."));
   });
   
-
-
 // User deletes their own task
 const deleteTaskByUser = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
@@ -73,6 +71,42 @@ const deleteTaskByUser = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, null, 'Task deleted successfully.'));
   });
+
+//update task by user
+const updateTaskByUser = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { description, category, status } = req.body;
+    const { user } = req; // The logged-in user
+  
+    const task = await Task.findById(taskId);
+  
+    if (!task) {
+      throw new ApiError(404, "Task not found.");
+    }
+  
+    if (task.userId.toString() !== user._id.toString()) {
+      throw new ApiError(403, "You do not have permission to update this task.");
+    }
+  
+    // Validate and update task details
+    if (description) task.description = description;
+    if (category) task.category = category;
+  
+    const validStatuses = ['Pending', 'In Progress', 'Completed'];
+    if (status && validStatuses.includes(status)) {
+      task.status = status;
+    } else if (status) {
+      throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
+  
+    const updatedTask = await task.save();
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedTask, "Task updated successfully."));
+  });
+  
+  export { updateTaskByUser };
 
 // get tasks by category
 const getTasksByCategory = asyncHandler(async (req, res) => {
