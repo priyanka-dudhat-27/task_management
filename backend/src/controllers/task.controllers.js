@@ -260,6 +260,25 @@ const createTaskForUserByAdmin = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, user, `User role updated to ${role}`));
   });
+
+  
+  // Route to view tasks categorized by type (category or status)
+  const viewTasksByCategoryOrStatus = asyncHandler(async (req, res) => {
+    const { category, status } = req.query;
+  
+    // Build the query based on category or status
+    let query = {};
+    if (category) query.category = category;
+    if (status) query.status = status;
+  
+    const tasks = await Task.find(query).populate("userId", "username email");
+  
+    if (!tasks.length) {
+      throw new ApiError(404, "No tasks found for the specified criteria.");
+    }
+  
+    return res.status(200).json(new ApiResponse(200, tasks, "Tasks retrieved successfully."));
+  });
   
 
 export { 
@@ -272,5 +291,6 @@ export {
     updateTaskForAnyUserByAdmin,
     deleteTaskForAnyUserByAdmin,
     getAllUsers,
-    assignUserRole
+    assignUserRole,
+    viewTasksByCategoryOrStatus
  };

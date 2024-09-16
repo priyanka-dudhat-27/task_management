@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middlware.js";
-import { createTask , deleteTaskByUser , updateTaskByUser , getTasksByCategory , markTaskAsCompleted , createTaskForUserByAdmin , updateTaskForAnyUserByAdmin , deleteTaskForAnyUserByAdmin , assignUserRole , getAllUsers} from "../controllers/task.controllers.js";
+import { createTask , deleteTaskByUser , updateTaskByUser , getTasksByCategory , markTaskAsCompleted , createTaskForUserByAdmin , updateTaskForAnyUserByAdmin , deleteTaskForAnyUserByAdmin , assignUserRole , getAllUsers , viewTasksByCategoryOrStatus} from "../controllers/task.controllers.js";
 const router = Router();
 
 router.route("/createTask").post(verifyJWT(['User']),createTask)
@@ -16,5 +16,7 @@ router.route("/deleteTaskByAdmin/:taskId").delete(verifyJWT(['Admin']),deleteTas
 router.route("/updateTaskByAdmin/:taskId").patch(verifyJWT(['Admin']),updateTaskForAnyUserByAdmin )
 router.route("/allUsers").get(verifyJWT(['Admin']), getAllUsers);
 router.route("/assignRole").patch(verifyJWT(['Admin']), assignUserRole);
+router.route("/tasksByCategoryOrStatus").get(verifyJWT(['Admin']), viewTasksByCategoryOrStatus);
+
  
 export default router;
