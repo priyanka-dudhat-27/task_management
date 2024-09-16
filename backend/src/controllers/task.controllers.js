@@ -73,9 +73,28 @@ const deleteTaskByUser = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, null, 'Task deleted successfully.'));
   });
-  
+
+// get tasks by category
+const getTasksByCategory = asyncHandler(async (req, res) => {
+  const { category } = req.params;
+  if (!category) {
+    throw new ApiError(400, "Category is required.");
+  }
+
+  const tasks = await Task.find({ category }).populate('userId'); // Populate userId to get user details
+
+  if (!tasks.length) {
+    throw new ApiError(404, "No tasks found for the specified category.");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tasks, "Tasks retrieved successfully."));
+});
+
 
 export { 
     createTask,
-    deleteTaskByUser
+    deleteTaskByUser,
+    getTasksByCategory
  };
