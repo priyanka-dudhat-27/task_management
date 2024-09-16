@@ -105,8 +105,6 @@ const updateTaskByUser = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, updatedTask, "Task updated successfully."));
   });
-  
-  export { updateTaskByUser };
 
 // get tasks by category
 const getTasksByCategory = asyncHandler(async (req, res) => {
@@ -149,9 +147,40 @@ const markTaskAsCompleted = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, task, "Task marked as completed successfully."));
   });
   
+//   ADMIN
+//admin create task for any user
+const createTaskForUserByAdmin = asyncHandler(async (req, res) => {
+    const { description, category, status, userId } = req.body;
+  
+    if (!description || !category || !userId) {
+      throw new ApiError(400, "Description , category and userId are required.");
+    }
+  
+    const validStatuses = ['Pending', 'In Progress', 'Completed'];
+    if (status && !validStatuses.includes(status)) {
+      throw new ApiError(400, `Status must be one of: ${validStatuses.join(', ')}`);
+    }
+  
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found.");
+    }
+  
+    // Create the task for the user
+    const task = await Task.create({
+      description,
+      category,
+      status: status || 'Pending',
+      userId: user._id // Assign task to the specified user
+    });
+  
+    return res.status(201).json(new ApiResponse(201, task, "Task created for the user successfully."));
+  });
 export { 
     createTask,
     deleteTaskByUser,
+    updateTaskByUser,
     getTasksByCategory,
-    markTaskAsCompleted
+    markTaskAsCompleted,
+    createTaskForUserByAdmin
  };
